@@ -44,9 +44,9 @@ export default function Settings() {
 
   async function handleNotifications() {
     setNotifBusy(true)
-    const ok = await subscribe()
-    if (ok) show('Notifications enabled 💜')
-    else show('Could not enable — check your browser settings')
+    const result = await subscribe()
+    if (result.ok) show('Notifications enabled 💜')
+    else show(result.error ?? 'Could not enable notifications')
     setNotifBusy(false)
   }
 
