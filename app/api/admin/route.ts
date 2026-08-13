@@ -69,9 +69,21 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
   if (!authorized(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { coupleId } = await req.json()
+  const { coupleId, slot } = await req.json()
   if (!coupleId) return NextResponse.json({ error: 'coupleId required' }, { status: 400 })
 
+  // Remove just one member slot
+  if (slot) {
+    const { error } = await supabaseAdmin
+      .from('couple_members')
+      .delete()
+      .eq('couple_id', coupleId)
+      .eq('slot', slot)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
+  // Delete entire couple + storage
   const { data: photos } = await supabaseAdmin
     .from('photos')
     .select('storage_path')
@@ -84,6 +96,22 @@ export async function DELETE(req: Request) {
   const { error } = await supabaseAdmin.from('couples').delete().eq('id', coupleId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  return NextResponse.json({ ok: true })
+}
+
+export async function PATCH(req: Request) {
+  if (!authorized(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const { coupleId, slot, name } = await req.json()
+  if (!coupleId || !slot || !name) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+
+  const { error } = await supabaseAdmin
+    .from('couple_members')
+    .update({ name: name.trim() })
+    .eq('couple_id', coupleId)
+    .eq('slot', slot)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
 

@@ -100,9 +100,12 @@ export default function AdminPage() {
   const [couples, setCouples] = useState<Couple[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [removeMemberTarget, setRemoveMemberTarget] = useState<{ coupleId: string; slot: string; name: string } | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [pushBusy, setPushBusy] = useState<string | null>(null)
   const [toast, setToast] = useState('')
+  const [editingName, setEditingName] = useState<{ [key: string]: string }>({})
+  const [savingName, setSavingName] = useState<string | null>(null)
 
   function showToast(msg: string) {
     setToast(msg)
@@ -139,7 +142,7 @@ export default function AdminPage() {
     }
   }
 
-  async function handleDelete(coupleId: string) {
+  async function handleDeleteCouple(coupleId: string) {
     setDeleting(true)
     try {
       const res = await fetch('/api/admin', {
@@ -160,6 +163,55 @@ export default function AdminPage() {
       showToast('Could not connect')
     } finally {
       setDeleting(false)
+    }
+  }
+
+  async function handleRemoveMember(coupleId: string, slot: string) {
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coupleId, slot }),
+      })
+      if (res.ok) {
+        setRemoveMemberTarget(null)
+        showToast('Member removed')
+        await refresh()
+      } else {
+        const d = await res.json()
+        showToast(d.error ?? 'Remove failed')
+      }
+    } catch {
+      showToast('Could not connect')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  async function handleSaveName(coupleId: string, slot: string) {
+    const key = `${coupleId}-${slot}`
+    const name = editingName[key]
+    if (!name?.trim()) return
+    setSavingName(key)
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coupleId, slot, name }),
+      })
+      if (res.ok) {
+        setEditingName(prev => { const n = { ...prev }; delete n[key]; return n })
+        showToast('Name updated')
+        await refresh()
+      } else {
+        const d = await res.json()
+        showToast(d.error ?? 'Save failed')
+      }
+    } catch {
+      showToast('Could not connect')
+    } finally {
+      setSavingName(null)
     }
   }
 
@@ -234,25 +286,32 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Delete confirmation modal */}
+      {/* Delete couple confirmation */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-6">
           <div className="w-full max-w-xs bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
             <p className="font-extrabold text-white text-lg">Delete couple?</p>
-            <p className="text-sm text-gray-400">This removes all their data including photos and reflections. This cannot be undone.</p>
+            <p className="text-sm text-gray-400">This removes all their data including photos and reflections. Cannot be undone.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className="flex-1 h-11 rounded-xl border border-gray-700 text-gray-400 font-bold text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteTarget)}
-                disabled={deleting}
-                className="flex-1 h-11 rounded-xl bg-red-600 text-white font-bold text-sm disabled:opacity-50"
-              >
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 h-11 rounded-xl border border-gray-700 text-gray-400 font-bold text-sm">Cancel</button>
+              <button onClick={() => handleDeleteCouple(deleteTarget)} disabled={deleting} className="flex-1 h-11 rounded-xl bg-red-600 text-white font-bold text-sm disabled:opacity-50">
                 {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove member confirmation */}
+      {removeMemberTarget && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-6">
+          <div className="w-full max-w-xs bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
+            <p className="font-extrabold text-white text-lg">Remove {removeMemberTarget.name}?</p>
+            <p className="text-sm text-gray-400">Their slot will be freed. The couple and the other member stay. They can rejoin with the invite code.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setRemoveMemberTarget(null)} className="flex-1 h-11 rounded-xl border border-gray-700 text-gray-400 font-bold text-sm">Cancel</button>
+              <button onClick={() => handleRemoveMember(removeMemberTarget.coupleId, removeMemberTarget.slot)} disabled={deleting} className="flex-1 h-11 rounded-xl bg-orange-600 text-white font-bold text-sm disabled:opacity-50">
+                {deleting ? 'Removing…' : 'Remove'}
               </button>
             </div>
           </div>
@@ -265,10 +324,7 @@ export default function AdminPage() {
           <h1 className="text-2xl font-extrabold text-white">Together Admin</h1>
           <p className="text-xs text-gray-500 mt-0.5">together-react.vercel.app</p>
         </div>
-        <button
-          onClick={refresh}
-          className="text-xs text-purple-400 font-bold border border-purple-900 rounded-lg px-3 py-1.5"
-        >
+        <button onClick={refresh} className="text-xs text-purple-400 font-bold border border-purple-900 rounded-lg px-3 py-1.5">
           Refresh
         </button>
       </div>
@@ -294,9 +350,7 @@ export default function AdminPage() {
           All Couples ({couples.length})
         </p>
         <div className="space-y-2">
-          {couples.length === 0 && (
-            <p className="text-gray-600 text-sm">No couples yet.</p>
-          )}
+          {couples.length === 0 && <p className="text-gray-600 text-sm">No couples yet.</p>}
           {couples.map(c => {
             const slotA = c.members.find(m => m.slot === 'A')
             const slotB = c.members.find(m => m.slot === 'B')
@@ -326,31 +380,80 @@ export default function AdminPage() {
 
                 {isExpanded && (
                   <div className="border-t border-gray-800 px-4 py-4 space-y-4">
+
                     {/* Member cards */}
                     <div className="grid grid-cols-2 gap-3">
-                      {[slotA, slotB].map((m, i) => {
-                        const pushKey = `${c.id}-${i === 0 ? 'A' : 'B'}`
+                      {(['A', 'B'] as const).map((slotKey, i) => {
+                        const m = c.members.find(x => x.slot === slotKey)
+                        const key = `${c.id}-${slotKey}`
+                        const isEditing = key in editingName
+                        const pushKey = key
+
                         return (
-                          <div key={i} className="bg-gray-950 rounded-xl p-3 border border-gray-800 space-y-2">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600">
-                              Slot {i === 0 ? 'A' : 'B'}
-                            </p>
+                          <div key={slotKey} className="bg-gray-950 rounded-xl p-3 border border-gray-800 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Slot {slotKey}</p>
+                              {m && !isEditing && (
+                                <button
+                                  onClick={() => setEditingName(prev => ({ ...prev, [key]: m.name }))}
+                                  className="text-[10px] text-purple-400 font-bold"
+                                >
+                                  Edit
+                                </button>
+                              )}
+                            </div>
+
                             {m ? (
                               <>
-                                <p className="font-bold text-white text-sm">{m.name}</p>
+                                {isEditing ? (
+                                  <div className="space-y-1.5">
+                                    <input
+                                      type="text"
+                                      value={editingName[key]}
+                                      onChange={e => setEditingName(prev => ({ ...prev, [key]: e.target.value }))}
+                                      className="w-full h-9 bg-gray-900 border border-gray-700 rounded-lg px-2 text-sm text-white outline-none focus:border-purple-500"
+                                      autoFocus
+                                    />
+                                    <div className="flex gap-1.5">
+                                      <button
+                                        onClick={() => setEditingName(prev => { const n = { ...prev }; delete n[key]; return n })}
+                                        className="flex-1 h-8 rounded-lg border border-gray-700 text-gray-500 text-[10px] font-bold"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => handleSaveName(c.id, slotKey)}
+                                        disabled={savingName === key || !editingName[key]?.trim()}
+                                        className="flex-1 h-8 rounded-lg bg-purple-700 text-white text-[10px] font-bold disabled:opacity-50"
+                                      >
+                                        {savingName === key ? '…' : 'Save'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="font-bold text-white text-sm">{m.name}</p>
+                                )}
                                 <p className="text-xs text-gray-500 break-all">{m.email ?? 'no email'}</p>
                                 <p className={`text-[10px] font-bold ${m.push_subscription ? 'text-green-400' : 'text-gray-600'}`}>
                                   {m.push_subscription ? '🔔 push on' : 'push off'}
                                 </p>
-                                {m.push_subscription && (
+                                <div className="flex gap-1.5">
+                                  {m.push_subscription && (
+                                    <button
+                                      onClick={() => handleTestPush(c.id, slotKey, m.name)}
+                                      disabled={pushBusy === pushKey}
+                                      className="flex-1 h-8 rounded-lg bg-purple-900 text-purple-300 text-[10px] font-bold disabled:opacity-50"
+                                    >
+                                      {pushBusy === pushKey ? '…' : 'Test push 🔔'}
+                                    </button>
+                                  )}
                                   <button
-                                    onClick={() => handleTestPush(c.id, i === 0 ? 'A' : 'B', m.name)}
-                                    disabled={pushBusy === pushKey}
-                                    className="w-full h-8 rounded-lg bg-purple-900 text-purple-300 text-[10px] font-bold disabled:opacity-50"
+                                    onClick={() => setRemoveMemberTarget({ coupleId: c.id, slot: slotKey, name: m.name })}
+                                    className="flex-1 h-8 rounded-lg border border-red-900 text-red-500 text-[10px] font-bold"
                                   >
-                                    {pushBusy === pushKey ? 'Sending…' : 'Test push 🔔'}
+                                    Remove
                                   </button>
-                                )}
+                                </div>
                               </>
                             ) : (
                               <p className="text-yellow-500 text-sm font-semibold">Empty</p>
@@ -360,7 +463,7 @@ export default function AdminPage() {
                       })}
                     </div>
 
-                    {/* Dates grid */}
+                    {/* Dates */}
                     <div className="grid grid-cols-2 gap-3 text-xs text-gray-500">
                       <div>
                         <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-1">Joined</p>
