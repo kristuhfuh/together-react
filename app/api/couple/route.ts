@@ -4,16 +4,9 @@ import { signSession, sessionCookieHeader, getSession } from '@/lib/session'
 import { genCode, today } from '@/lib/utils'
 
 export async function POST(req: Request) {
-  const { myName, partnerName, email, accessToken } = await req.json()
+  const { myName, partnerName, email } = await req.json()
   if (!myName?.trim() || !partnerName?.trim()) {
     return NextResponse.json({ error: 'Missing names' }, { status: 400 })
-  }
-
-  if (email && accessToken) {
-    const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(accessToken)
-    if (authErr || !user || user.email !== email) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
   }
 
   const inviteCode = genCode()
@@ -25,7 +18,6 @@ export async function POST(req: Request) {
     .single()
 
   if (coupleErr || !couple) {
-    console.error('[/api/couple] couples insert error:', coupleErr)
     return NextResponse.json({ error: coupleErr?.message ?? 'DB error' }, { status: 500 })
   }
 
@@ -33,11 +25,10 @@ export async function POST(req: Request) {
     couple_id: couple.id,
     slot: 'A',
     name: myName.trim(),
-    ...(email ? { email } : {}),
+    ...(email ? { email: email.trim().toLowerCase() } : {}),
   })
 
   if (memberErr) {
-    console.error('[/api/couple] couple_members insert error:', memberErr)
     return NextResponse.json({ error: memberErr.message }, { status: 500 })
   }
 

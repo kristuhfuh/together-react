@@ -1,21 +1,23 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { OtpForm } from '@/components/OtpForm'
+import Link from 'next/link'
 
 export default function SignIn() {
   const router = useRouter()
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  async function handleVerified(email: string, accessToken: string) {
+  async function handleSignIn() {
+    if (!email.trim() || loading) return
     setLoading(true)
     setError('')
     try {
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, accessToken }),
+        body: JSON.stringify({ email: email.trim() }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -36,34 +38,54 @@ export default function SignIn() {
 
   return (
     <main className="min-h-screen bg-[#FBF8F4] flex flex-col px-6 pt-14 pb-8">
-      <div className="w-full max-w-sm mx-auto space-y-8">
+      <div className="w-full max-w-sm mx-auto space-y-6">
         <div>
-          <button onClick={() => router.back()} className="text-[#9B88C8] text-sm font-bold block mb-6">
+          <button onClick={() => router.back()} className="text-[#9B88C8] text-sm font-semibold block mb-6">
             ← Back
           </button>
           <h1 className="text-3xl font-extrabold text-[#2B3A4A]">Sign back in</h1>
           <p className="text-sm text-[#2B3A4A]/50 mt-1.5">
-            We'll send a quick code to verify it's you.
+            Enter the email you used to create your space.
           </p>
         </div>
 
-        {loading ? (
-          <p className="text-center text-[#9B88C8] font-semibold">Signing you in…</p>
-        ) : (
-          <OtpForm onVerified={handleVerified} />
-        )}
+        <div>
+          <label className="text-[10px] font-medium text-[#2B3A4A]/40 block mb-1.5">Your email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSignIn()}
+            placeholder="you@example.com"
+            autoComplete="email"
+            autoFocus
+            className="w-full h-14 bg-white border border-[#EDE8F5] rounded-2xl px-4 text-base font-semibold text-[#2B3A4A] outline-none focus:border-[#C4B5E0] transition-colors"
+          />
+        </div>
 
         {error && (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <p className="text-red-500 text-sm font-medium">{error}</p>
-            <button
-              onClick={() => setError('')}
-              className="w-full text-sm text-[#9B88C8] font-semibold py-2"
-            >
-              Try again
-            </button>
+            {error.includes('No account') && (
+              <div className="flex gap-3">
+                <Link href="/create" className="flex-1 text-center h-11 rounded-xl border border-[#EDE8F5] text-[#9B88C8] font-semibold text-sm flex items-center justify-center">
+                  Start a space
+                </Link>
+                <Link href="/join" className="flex-1 text-center h-11 rounded-xl border border-[#EDE8F5] text-[#9B88C8] font-semibold text-sm flex items-center justify-center">
+                  Join with code
+                </Link>
+              </div>
+            )}
           </div>
         )}
+
+        <button
+          onClick={handleSignIn}
+          disabled={loading || !email.trim()}
+          className="w-full h-14 rounded-2xl bg-[#C4B5E0] text-white font-bold text-base shadow-sm active:scale-[0.98] transition-transform disabled:opacity-50"
+        >
+          {loading ? 'Signing in…' : 'Sign in'}
+        </button>
       </div>
     </main>
   )

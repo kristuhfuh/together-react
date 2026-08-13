@@ -3,33 +3,20 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import { signSession, sessionCookieHeader } from '@/lib/session'
 
 export async function POST(req: Request) {
-  const { email, accessToken } = await req.json()
-  if (!email || !accessToken) {
-    return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+  const { email } = await req.json()
+  if (!email?.trim()) {
+    return NextResponse.json({ error: 'Missing email' }, { status: 400 })
   }
 
-  const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(accessToken)
-  if (authErr || !user || user.email !== email) {
-    return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-  }
+  const normalised = email.trim().toLowerCase()
 
   const { data: member } = await supabaseAdmin
     .from('couple_members')
     .select('couple_id, slot, name')
-    .eq('email', email)
+    .eq('email', normalised)
     .single()
 
   if (!member) {
-    return NextResponse.json({ error: 'No account found' }, { status: 404 })
-  }
-
-  const { data: couple } = await supabaseAdmin
-    .from('couples')
-    .select('id')
-    .eq('id', member.couple_id)
-    .single()
-
-  if (!couple) {
     return NextResponse.json({ error: 'No account found' }, { status: 404 })
   }
 
