@@ -28,8 +28,10 @@ export function useNotifications() {
 
       if (!sub) {
         const perm = await Notification.requestPermission()
-        setPermission(perm)
-        if (perm !== 'granted') return false
+        if (perm !== 'granted') {
+          setPermission(perm)
+          return false
+        }
 
         const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
         sub = await reg.pushManager.subscribe({
@@ -38,12 +40,15 @@ export function useNotifications() {
         })
       }
 
-      await fetch('/api/push', {
+      const res = await fetch('/api/push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sub.toJSON()),
       })
 
+      if (!res.ok) return false
+
+      setPermission('granted')
       return true
     } catch {
       return false
