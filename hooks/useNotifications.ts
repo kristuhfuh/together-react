@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -11,9 +11,13 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
 }
 
 export function useNotifications() {
-  const [permission, setPermission] = useState<NotificationPermission>(
-    typeof Notification !== 'undefined' ? Notification.permission : 'default'
-  )
+  const [permission, setPermission] = useState<NotificationPermission>('default')
+
+  useEffect(() => {
+    if (typeof Notification !== 'undefined') {
+      setPermission(Notification.permission)
+    }
+  }, [])
 
   const subscribe = useCallback(async (): Promise<boolean> => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
