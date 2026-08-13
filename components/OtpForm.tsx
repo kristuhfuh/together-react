@@ -19,7 +19,10 @@ export function OtpForm({ onVerified }: Props) {
     setError('')
     const { error: err } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { shouldCreateUser: true },
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
     setLoading(false)
     if (err) { setError(err.message); return }

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { OtpForm } from '@/components/OtpForm'
@@ -13,6 +13,18 @@ export default function Create() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [code, setCode] = useState('')
+
+  useEffect(() => {
+    const pending = sessionStorage.getItem('together-pending-auth')
+    if (pending) {
+      try {
+        const { email, accessToken } = JSON.parse(pending)
+        sessionStorage.removeItem('together-pending-auth')
+        setAuth({ email, accessToken })
+        setStep('names')
+      } catch {}
+    }
+  }, [])
 
   function handleVerified(email: string, accessToken: string) {
     setAuth({ email, accessToken })
