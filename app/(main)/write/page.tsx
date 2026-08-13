@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react'
 import { useSession, useToast } from '@/lib/store'
 import { useRealtime } from '@/hooks/useRealtime'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { PullIndicator } from '@/components/PullIndicator'
 
 interface Writing {
   id: string
@@ -101,9 +103,11 @@ export default function Write() {
   }
 
   const expandedWriting = writings.find(w => w.id === expanded)
+  const { pullY, refreshing } = usePullToRefresh(loadWritings)
 
   return (
     <main className="px-5 pt-10 pb-24 max-w-sm mx-auto">
+      <PullIndicator pullY={pullY} refreshing={refreshing} />
       <div className="flex items-start justify-between mb-6">
         <div>
           <p className="text-xs font-medium text-[#2B3A4A]/40">Shared</p>

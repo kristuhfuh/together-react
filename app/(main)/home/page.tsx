@@ -8,6 +8,8 @@ import { WeeklyStrip } from '@/components/WeeklyStrip'
 import { ThinkingButton } from '@/components/ThinkingButton'
 import { DeckCarousel } from '@/components/DeckCarousel'
 import { useRealtime } from '@/hooks/useRealtime'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { PullIndicator } from '@/components/PullIndicator'
 import Link from 'next/link'
 
 interface CoupleInfo {
@@ -64,8 +66,12 @@ export default function Home() {
 
   const partnerMissing = !partnerName
 
+  async function reload() { await Promise.all([loadCouple(), loadAnswers()]) }
+  const { pullY, refreshing } = usePullToRefresh(reload)
+
   return (
     <main className="px-5 pt-10 pb-24 max-w-sm mx-auto space-y-5">
+      <PullIndicator pullY={pullY} refreshing={refreshing} />
 
       {/* Greeting */}
       <div>

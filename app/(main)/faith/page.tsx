@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { useSession, useToast } from '@/lib/store'
 import { SCRIPTURE_TOPICS } from '@/lib/data/scripture'
 import { useRealtime } from '@/hooks/useRealtime'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { PullIndicator } from '@/components/PullIndicator'
 
 function dailyTopicId(): string {
   const day = Math.floor(Date.now() / 86400000)
@@ -79,11 +81,14 @@ export default function Faith() {
     }
   }
 
+  const { pullY, refreshing } = usePullToRefresh(loadStats)
+
   if (!topic) {
     const todayTopic = SCRIPTURE_TOPICS.find(t => t.id === todayId)!
 
     return (
       <main className="px-5 pt-12 pb-6 max-w-sm mx-auto space-y-5">
+        <PullIndicator pullY={pullY} refreshing={refreshing} />
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8]">Daily Study</p>
@@ -141,6 +146,7 @@ export default function Faith() {
 
   return (
     <main className="px-5 pt-12 pb-6 max-w-sm mx-auto space-y-5">
+      <PullIndicator pullY={pullY} refreshing={refreshing} />
       <div className="flex items-start justify-between">
         <div>
           <button

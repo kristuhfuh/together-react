@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSession, useToast } from '@/lib/store'
 import { useRealtime } from '@/hooks/useRealtime'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { PullIndicator } from '@/components/PullIndicator'
 
 interface Photo {
   id: string
@@ -276,9 +278,11 @@ export default function Photos() {
 
   const stackPhotos = photos.filter(p => p.slot !== slot && !dismissed.has(p.id))
   const hasStack = stackPhotos.length > 0
+  const { pullY, refreshing } = usePullToRefresh(loadPhotos)
 
   return (
     <main className="pb-24 max-w-sm mx-auto">
+      <PullIndicator pullY={pullY} refreshing={refreshing} />
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-10 mb-5">
         <div>
