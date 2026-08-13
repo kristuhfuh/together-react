@@ -45,7 +45,7 @@ export async function GET(req: Request) {
   }))
 
   const pushEnabled = (members ?? []).filter(m => m.push_subscription).length
-  const fullCouples = Object.values(membersByCouple).filter(ms => ms.length === 2).length
+  const fullCouples = Object.values(membersByCouple).filter(ms => (ms ?? []).length === 2).length
 
   const storageFolders = storageFiles?.length ?? 0
   const storageMb = Math.round((photoCount ?? 0) * 0.35)
