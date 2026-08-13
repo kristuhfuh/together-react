@@ -378,49 +378,24 @@ export default function Photos() {
             </div>
           )}
 
-          {/* Gallery */}
+          {/* Gallery grid */}
           {showGallery && (
-            <div className="space-y-4 px-5 mt-4">
-              {photos.map(p => {
-                const isMe = p.slot === slot
-                const authorName = isMe ? myName : partnerName
-                const isConfirming = confirmDeleteId === p.id
-                return (
-                  <div key={p.id} className="bg-white rounded-2xl overflow-hidden border border-[#F0EDF8]">
-                    <div className="flex items-center gap-3 px-4 py-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${isMe ? 'bg-[#C4B5E0]' : 'bg-[#9B88C8]'}`}>
-                        {(authorName || '?')[0].toUpperCase()}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-[#2B3A4A]">{authorName || (isMe ? 'You' : 'Partner')}</p>
-                        <p className="text-[10px] text-[#2B3A4A]/40 font-medium">{fmtRelative(p.taken_at)}</p>
-                      </div>
-                      {isMe && !isConfirming && (
-                        <button onClick={() => setConfirmDeleteId(p.id)} className="text-[#2B3A4A]/20 hover:text-[#2B3A4A]/40 p-1">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
-                          </svg>
-                        </button>
-                      )}
-                      {isMe && isConfirming && (
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => setConfirmDeleteId(null)} className="text-xs font-semibold text-[#2B3A4A]/40 px-2 py-1">Cancel</button>
-                          <button onClick={() => handleDelete(p.id)} disabled={deleting} className="text-xs font-semibold text-red-400 bg-red-50 rounded-lg px-2.5 py-1 disabled:opacity-50">
-                            {deleting ? '…' : 'Delete'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.url} alt={p.caption || ''} className="w-full object-cover cursor-pointer" style={{ maxHeight: 480 }} onClick={() => setSelected(p)} loading="lazy" />
-                    {p.caption && (
-                      <div className="px-4 py-3">
-                        <p className="text-sm text-[#2B3A4A] font-medium">{p.caption}</p>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+            <div className="grid grid-cols-3 gap-0.5 mt-4">
+              {photos.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => setSelected(p)}
+                  className="relative aspect-square overflow-hidden bg-[#F0EDF8] active:opacity-80 transition-opacity"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.url}
+                    alt={p.caption || ''}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
             </div>
           )}
         </>
@@ -454,20 +429,69 @@ export default function Photos() {
       )}
 
       {/* Fullscreen lightbox */}
-      {selected && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center" onClick={() => setSelected(null)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={selected.url} alt={selected.caption} className="max-w-full max-h-[80vh] object-contain" onClick={e => e.stopPropagation()} />
-          {selected.caption && (
-            <p className="text-white/70 text-sm font-medium mt-4 px-6 text-center" onClick={e => e.stopPropagation()}>{selected.caption}</p>
-          )}
-          <button onClick={() => setSelected(null)} className="absolute top-6 right-6 text-white/60 w-10 h-10 flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      )}
+      {selected && (() => {
+        const isMe = selected.slot === slot
+        const authorName = isMe ? myName : partnerName
+        const isConfirming = confirmDeleteId === selected.id
+        return (
+          <div className="fixed inset-0 z-50 bg-black flex flex-col" onClick={() => { setSelected(null); setConfirmDeleteId(null) }}>
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-4 pt-10 pb-3 shrink-0" onClick={e => e.stopPropagation()}>
+              <div>
+                <p className="text-white text-sm font-bold leading-none">{authorName || (isMe ? 'You' : 'Partner')}</p>
+                <p className="text-white/40 text-[11px] font-medium mt-0.5">{fmtRelative(selected.taken_at)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {isMe && !isConfirming && (
+                  <button
+                    onClick={() => setConfirmDeleteId(selected.id)}
+                    className="text-white/40 w-9 h-9 flex items-center justify-center"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
+                    </svg>
+                  </button>
+                )}
+                <button onClick={() => { setSelected(null); setConfirmDeleteId(null) }} className="text-white/60 w-9 h-9 flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Image */}
+            <div className="flex-1 flex items-center justify-center overflow-hidden px-2" onClick={e => e.stopPropagation()}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={selected.url} alt={selected.caption} className="max-w-full max-h-full object-contain rounded-xl" />
+            </div>
+
+            {/* Bottom: caption + delete confirm */}
+            <div className="shrink-0 px-5 pt-3 pb-10" onClick={e => e.stopPropagation()}>
+              {selected.caption && (
+                <p className="text-white/70 text-sm font-medium mb-3 text-center">{selected.caption}</p>
+              )}
+              {isConfirming && (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setConfirmDeleteId(null)}
+                    className="flex-1 h-11 rounded-2xl border border-white/20 text-white/60 font-semibold text-sm"
+                  >
+                    Keep it
+                  </button>
+                  <button
+                    onClick={() => handleDelete(selected.id)}
+                    disabled={deleting}
+                    className="flex-1 h-11 rounded-2xl bg-red-500/80 text-white font-semibold text-sm disabled:opacity-50"
+                  >
+                    {deleting ? 'Deleting…' : 'Delete'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
     </main>
   )
 }
