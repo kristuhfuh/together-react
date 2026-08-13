@@ -53,7 +53,7 @@ export default function Profile() {
       if (res.ok && coupleId && slot) {
         setSession({ coupleId, slot, myName: data.myName, partnerName })
         setEditingMyName(false)
-        show('Name updated 💜')
+        show('Name updated')
       } else {
         show('Could not update — try again')
       }
@@ -77,7 +77,7 @@ export default function Profile() {
       if (res.ok && coupleId && slot) {
         setSession({ coupleId, slot, myName, partnerName: data.partnerName })
         setEditingPartnerName(false)
-        show("Partner's name updated 💜")
+        show("Partner's name updated")
       } else {
         show('Could not update — try again')
       }
@@ -96,7 +96,7 @@ export default function Profile() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ datingSince, nextVisit }),
       })
-      if (res.ok) show('Saved 💜')
+      if (res.ok) show('Saved')
       else show('Could not save — try again')
     } catch {
       show('Could not connect')
@@ -108,7 +108,7 @@ export default function Profile() {
   async function handleNotifications() {
     setNotifBusy(true)
     const ok = await subscribe()
-    if (ok) show('Notifications enabled 💜')
+    if (ok) show('Notifications enabled')
     else show('Could not enable — check your browser settings')
     setNotifBusy(false)
   }
@@ -144,21 +144,23 @@ export default function Profile() {
   }
 
   return (
-    <main className="px-5 pt-12 pb-6 max-w-sm mx-auto space-y-6">
+    <main className="px-5 pt-10 pb-24 max-w-sm mx-auto space-y-6">
+
+      {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8]">Your Account</p>
-        <h1 className="text-2xl font-extrabold text-[#2B3A4A] mt-1">Profile</h1>
+        <p className="text-xs font-medium text-[#2B3A4A]/40">Your account</p>
+        <h1 className="text-2xl font-extrabold text-[#2B3A4A] mt-0.5">Profile</h1>
       </div>
 
       {/* Names */}
-      <div className="bg-white rounded-3xl p-5 shadow-sm space-y-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40">Names</p>
+      <div className="bg-white rounded-3xl p-5 border border-[#F0EDF8] space-y-4">
+        <p className="text-xs font-semibold text-[#2B3A4A]/40">Names</p>
 
         {/* My name */}
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8]/70 mb-2">You</p>
           {editingMyName ? (
             <div className="space-y-2">
+              <p className="text-[10px] font-medium text-[#2B3A4A]/40">You</p>
               <input
                 type="text"
                 value={myNameInput}
@@ -168,19 +170,22 @@ export default function Profile() {
                 className="w-full h-12 bg-[#F7F4FB] border border-[#EDE8F5] rounded-xl px-4 text-base font-semibold text-[#2B3A4A] outline-none focus:border-[#C4B5E0] transition-colors"
               />
               <div className="flex gap-2">
-                <button onClick={() => { setEditingMyName(false); setMyNameInput(myName) }} className="flex-1 h-10 rounded-xl border border-[#EDE8F5] text-[#2B3A4A]/50 font-bold text-sm">Cancel</button>
-                <button onClick={handleSaveMyName} disabled={savingName || !myNameInput.trim() || myNameInput.trim() === myName} className="flex-1 h-10 rounded-xl bg-[#C4B5E0] text-white font-bold text-sm disabled:opacity-50">{savingName ? 'Saving…' : 'Save'}</button>
+                <button onClick={() => { setEditingMyName(false); setMyNameInput(myName) }} className="flex-1 h-10 rounded-xl border border-[#EDE8F5] text-[#2B3A4A]/50 font-semibold text-sm">Cancel</button>
+                <button onClick={handleSaveMyName} disabled={savingName || !myNameInput.trim() || myNameInput.trim() === myName} className="flex-1 h-10 rounded-xl bg-[#C4B5E0] text-white font-semibold text-sm disabled:opacity-50">{savingName ? 'Saving…' : 'Save'}</button>
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#C4B5E0] flex items-center justify-center text-white font-extrabold text-sm">
+                <div className="w-9 h-9 rounded-full bg-[#C4B5E0] flex items-center justify-center text-white font-bold text-sm">
                   {(myName || '?')[0].toUpperCase()}
                 </div>
-                <p className="font-extrabold text-[#2B3A4A]">{myName || '—'}</p>
+                <div>
+                  <p className="text-[10px] font-medium text-[#2B3A4A]/40">You</p>
+                  <p className="font-bold text-[#2B3A4A] text-sm">{myName || '—'}</p>
+                </div>
               </div>
-              <button onClick={() => setEditingMyName(true)} className="text-sm text-[#9B88C8] font-bold">Edit</button>
+              <button onClick={() => setEditingMyName(true)} className="text-sm text-[#9B88C8] font-semibold">Edit</button>
             </div>
           )}
         </div>
@@ -189,9 +194,9 @@ export default function Profile() {
 
         {/* Partner name */}
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8]/70 mb-2">Partner</p>
           {editingPartnerName ? (
             <div className="space-y-2">
+              <p className="text-[10px] font-medium text-[#2B3A4A]/40">Partner</p>
               <input
                 type="text"
                 value={partnerNameInput}
@@ -201,19 +206,22 @@ export default function Profile() {
                 className="w-full h-12 bg-[#F7F4FB] border border-[#EDE8F5] rounded-xl px-4 text-base font-semibold text-[#2B3A4A] outline-none focus:border-[#C4B5E0] transition-colors"
               />
               <div className="flex gap-2">
-                <button onClick={() => { setEditingPartnerName(false); setPartnerNameInput(partnerName) }} className="flex-1 h-10 rounded-xl border border-[#EDE8F5] text-[#2B3A4A]/50 font-bold text-sm">Cancel</button>
-                <button onClick={handleSavePartnerName} disabled={savingName || !partnerNameInput.trim() || partnerNameInput.trim() === partnerName} className="flex-1 h-10 rounded-xl bg-[#C4B5E0] text-white font-bold text-sm disabled:opacity-50">{savingName ? 'Saving…' : 'Save'}</button>
+                <button onClick={() => { setEditingPartnerName(false); setPartnerNameInput(partnerName) }} className="flex-1 h-10 rounded-xl border border-[#EDE8F5] text-[#2B3A4A]/50 font-semibold text-sm">Cancel</button>
+                <button onClick={handleSavePartnerName} disabled={savingName || !partnerNameInput.trim() || partnerNameInput.trim() === partnerName} className="flex-1 h-10 rounded-xl bg-[#C4B5E0] text-white font-semibold text-sm disabled:opacity-50">{savingName ? 'Saving…' : 'Save'}</button>
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#9B88C8] flex items-center justify-center text-white font-extrabold text-sm">
+                <div className="w-9 h-9 rounded-full bg-[#9B88C8] flex items-center justify-center text-white font-bold text-sm">
                   {(partnerName || '?')[0].toUpperCase()}
                 </div>
-                <p className="font-extrabold text-[#2B3A4A]">{partnerName || '—'}</p>
+                <div>
+                  <p className="text-[10px] font-medium text-[#2B3A4A]/40">Partner</p>
+                  <p className="font-bold text-[#2B3A4A] text-sm">{partnerName || '—'}</p>
+                </div>
               </div>
-              <button onClick={() => setEditingPartnerName(true)} className="text-sm text-[#9B88C8] font-bold">Edit</button>
+              <button onClick={() => setEditingPartnerName(true)} className="text-sm text-[#9B88C8] font-semibold">Edit</button>
             </div>
           )}
         </div>
@@ -221,65 +229,72 @@ export default function Profile() {
 
       {/* Invite code */}
       {inviteCode && (
-        <div className="bg-[#EDE8F5] rounded-3xl p-5 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8] mb-1">Invite Code</p>
+        <div className="bg-[#EDE8F5] rounded-3xl p-5">
+          <p className="text-xs font-semibold text-[#9B88C8] mb-1">Invite Code</p>
           <p className="text-3xl font-extrabold text-[#2B3A4A] tracking-[0.15em]">{inviteCode}</p>
           <p className="text-xs text-[#2B3A4A]/40 font-medium mt-1">Share with your partner to join</p>
         </div>
       )}
 
       {/* Important dates */}
-      <div className="bg-white rounded-3xl p-5 shadow-sm space-y-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40">Important Dates</p>
+      <div className="bg-white rounded-3xl p-5 border border-[#F0EDF8] space-y-4">
+        <p className="text-xs font-semibold text-[#2B3A4A]/40">Important dates</p>
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40 block mb-1.5">Dating since</label>
+          <label className="text-[10px] font-medium text-[#2B3A4A]/40 block mb-1.5">Dating since</label>
           <input type="date" value={datingSince} onChange={e => setDatingSince(e.target.value)} className="w-full h-12 bg-[#F7F4FB] border border-[#EDE8F5] rounded-xl px-4 text-sm font-semibold text-[#2B3A4A] outline-none focus:border-[#C4B5E0] transition-colors" />
           {datingSince && <p className="text-[11px] text-[#2B3A4A]/40 font-medium mt-1">Since {fmtDate(datingSince)}</p>}
         </div>
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40 block mb-1.5">Next visit</label>
+          <label className="text-[10px] font-medium text-[#2B3A4A]/40 block mb-1.5">Next visit</label>
           <input type="date" value={nextVisit} onChange={e => setNextVisit(e.target.value)} className="w-full h-12 bg-[#F7F4FB] border border-[#EDE8F5] rounded-xl px-4 text-sm font-semibold text-[#2B3A4A] outline-none focus:border-[#C4B5E0] transition-colors" />
           {nextVisit && <p className="text-[11px] text-[#2B3A4A]/40 font-medium mt-1">{fmtDate(nextVisit)}</p>}
         </div>
-        <button onClick={handleSaveDates} disabled={savingDates} className="w-full h-12 rounded-xl bg-[#C4B5E0] text-white font-bold text-sm shadow-sm active:scale-[0.98] transition-transform disabled:opacity-50">
+        <button onClick={handleSaveDates} disabled={savingDates} className="w-full h-12 rounded-xl bg-[#C4B5E0] text-white font-semibold text-sm disabled:opacity-50 active:scale-[0.98] transition-transform">
           {savingDates ? 'Saving…' : 'Save dates'}
         </button>
       </div>
 
       {/* Notifications */}
-      <div className="bg-white rounded-3xl p-5 shadow-sm">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40 mb-1">Notifications</p>
+      <div className="bg-white rounded-3xl p-5 border border-[#F0EDF8]">
+        <p className="text-xs font-semibold text-[#2B3A4A]/40 mb-1">Notifications</p>
         <p className="text-xs text-[#2B3A4A]/50 font-medium mb-4">Get notified when your partner is thinking of you</p>
         {permission === 'granted' ? (
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-400" />
-            <p className="text-sm font-bold text-[#2B3A4A]/60">Notifications enabled</p>
+            <p className="text-sm font-semibold text-[#2B3A4A]/60">Notifications enabled</p>
           </div>
         ) : (
-          <button onClick={handleNotifications} disabled={notifBusy} className="w-full h-12 rounded-xl bg-[#EDE8F5] text-[#9B88C8] font-bold text-sm active:scale-[0.98] transition-transform disabled:opacity-50">
+          <button onClick={handleNotifications} disabled={notifBusy} className="w-full h-12 rounded-xl bg-[#F7F4FB] border border-[#EDE8F5] text-[#9B88C8] font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-50">
             {notifBusy ? 'Enabling…' : 'Enable notifications'}
           </button>
         )}
       </div>
 
-      {/* Account actions */}
-      <div className="bg-white rounded-3xl p-5 shadow-sm space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40">Account</p>
+      {/* Session */}
+      <div className="pt-2">
         <button
           onClick={handleSignOut}
-          className="w-full h-12 rounded-xl border border-[#EDE8F5] text-[#2B3A4A]/60 font-bold text-sm active:scale-[0.98] transition-transform"
+          className="w-full h-12 rounded-xl border border-[#EDE8F5] text-[#2B3A4A]/50 font-semibold text-sm active:scale-[0.98] transition-transform"
         >
           Sign out
         </button>
+      </div>
+
+      {/* Danger zone — visually separated */}
+      <div className="border-t border-[#F0EDF8] pt-4 pb-2">
+        <p className="text-[10px] font-medium text-[#2B3A4A]/30 mb-3">Danger zone</p>
         <button
           onClick={() => { setShowReset(true); setResetCode(''); setResetError('') }}
-          className="w-full h-12 rounded-xl border border-red-100 text-red-400 font-bold text-sm active:scale-[0.98] transition-transform"
+          className="w-full h-12 rounded-xl border border-red-100 bg-red-50/50 text-red-400 font-semibold text-sm active:scale-[0.98] transition-transform"
         >
           Leave this couple
         </button>
+        <p className="text-[10px] text-[#2B3A4A]/30 font-medium text-center mt-2">
+          Your slot will be freed. The couple stays.
+        </p>
       </div>
 
-      {/* Reset confirmation modal */}
+      {/* Leave confirmation modal */}
       {showReset && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-end">
           <div className="w-full bg-[#FBF8F4] rounded-t-3xl p-6 space-y-4 max-w-sm mx-auto">
@@ -303,14 +318,14 @@ export default function Profile() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowReset(false)}
-                className="flex-1 h-12 rounded-2xl border border-[#EDE8F5] text-[#2B3A4A]/60 font-bold text-sm"
+                className="flex-1 h-12 rounded-2xl border border-[#EDE8F5] text-[#2B3A4A]/60 font-semibold text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReset}
                 disabled={resetting || resetCode.length < 6}
-                className="flex-1 h-12 rounded-2xl bg-red-400 text-white font-bold text-sm disabled:opacity-50"
+                className="flex-1 h-12 rounded-2xl bg-red-400 text-white font-semibold text-sm disabled:opacity-50"
               >
                 {resetting ? 'Leaving…' : 'Leave'}
               </button>

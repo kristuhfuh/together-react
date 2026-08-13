@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const NAV = [
-  { href: '/home',     label: 'Home',    icon: HomeIcon },
-  { href: '/faith',    label: 'Faith',   icon: FaithIcon },
-  { href: '/write',    label: 'Write',   icon: WriteIcon },
-  { href: '/photos',   label: 'Photos',  icon: PhotoIcon },
-  { href: '/profile',  label: 'Profile', icon: ProfileIcon },
+  { href: '/home',    label: 'Home',    icon: HomeIcon },
+  { href: '/faith',   label: 'Faith',   icon: FaithIcon },
+  { href: '/write',   label: 'Write',   icon: WriteIcon },
+  { href: '/photos',  label: 'Photos',  icon: PhotoIcon },
+  { href: '/profile', label: 'Profile', icon: ProfileIcon },
 ]
 
 export function BottomNav() {
@@ -22,12 +22,12 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center gap-0.5 min-w-[52px] py-1 transition-all ${
-                active ? 'text-[#9B88C8]' : 'text-[#2B3A4A]/35'
+              className={`flex flex-col items-center gap-1 min-w-[52px] py-1 transition-all ${
+                active ? 'text-[#9B88C8]' : 'text-[#2B3A4A]/30'
               }`}
             >
               <Icon active={active} />
-              <span className={`text-[9px] font-bold tracking-wide ${active ? 'text-[#9B88C8]' : ''}`}>
+              <span className={`text-[10px] font-semibold tracking-wide ${active ? 'text-[#9B88C8]' : 'text-[#2B3A4A]/35'}`}>
                 {label}
               </span>
             </Link>
@@ -50,7 +50,9 @@ function HomeIcon({ active }: { active: boolean }) {
 function FaithIcon({ active }: { active: boolean }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.5 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2v20M2 12h20" />
+      {/* Cross: vertical full height, horizontal bar at upper third */}
+      <line x1="12" y1="2" x2="12" y2="22" />
+      <line x1="5" y1="8" x2="19" y2="8" />
     </svg>
   )
 }

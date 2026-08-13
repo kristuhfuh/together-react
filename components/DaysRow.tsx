@@ -1,4 +1,5 @@
 import { daysApart, daysUntil, datingDuration, fmtDate } from '@/lib/utils'
+import Link from 'next/link'
 
 interface DaysRowProps {
   startDate: string | null
@@ -11,51 +12,50 @@ export function DaysRow({ startDate, nextVisit, datingSince }: DaysRowProps) {
   const until = daysUntil(nextVisit)
   const duration = datingDuration(datingSince)
 
+  const hasAnyData = datingSince || startDate || nextVisit !== null
+
+  if (!hasAnyData) {
+    return (
+      <Link href="/profile" className="block">
+        <p className="text-xs text-[#9B88C8]/60 font-medium">
+          Add your dates in <span className="font-bold text-[#9B88C8]">Profile →</span>
+        </p>
+      </Link>
+    )
+  }
+
   return (
-    <div className="space-y-3">
+    <div className="flex items-center gap-4">
       {datingSince && (
-        <div className="bg-gradient-to-br from-[#C4B5E0] to-[#9B88C8] rounded-3xl p-5 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">Together</p>
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-4xl font-extrabold text-white leading-none">{duration}</p>
-              <p className="text-xs text-white/60 mt-1.5 font-medium">since {fmtDate(datingSince)}</p>
-            </div>
-            <div className="text-4xl opacity-60">💜</div>
+        <>
+          <div className="min-w-0">
+            <p className="text-[10px] font-medium text-[#2B3A4A]/40">Together</p>
+            <p className="text-sm font-bold text-[#9B88C8]">{duration}</p>
           </div>
-        </div>
+          <div className="w-px h-6 bg-[#EDE8F5] flex-shrink-0" />
+        </>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white rounded-3xl p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8] mb-1">Days Apart</p>
-          <p className="text-4xl font-extrabold text-[#2B3A4A] leading-none">{apart}</p>
-          {startDate ? (
-            <p className="text-[11px] text-[#2B3A4A]/40 mt-1.5 font-medium">since {fmtDate(startDate)}</p>
-          ) : (
-            <p className="text-[11px] text-[#2B3A4A]/30 mt-1.5 font-medium">set in settings</p>
-          )}
-        </div>
+      {startDate && (
+        <>
+          <div className="min-w-0">
+            <p className="text-[10px] font-medium text-[#2B3A4A]/40">Apart</p>
+            <p className="text-sm font-bold text-[#2B3A4A]">{apart}d</p>
+          </div>
+          {until !== null && <div className="w-px h-6 bg-[#EDE8F5] flex-shrink-0" />}
+        </>
+      )}
 
-        <div className="bg-[#EDE8F5] rounded-3xl p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8] mb-1">
-            {until !== null ? 'Next Visit' : 'Next Visit'}
+      {until !== null && (
+        <div className="min-w-0">
+          <p className="text-[10px] font-medium text-[#2B3A4A]/40">
+            {until === 0 ? 'Visit' : 'Visit in'}
           </p>
-          {until !== null ? (
-            <>
-              <p className="text-4xl font-extrabold text-[#9B88C8] leading-none">{until}</p>
-              <p className="text-[11px] text-[#2B3A4A]/40 mt-1.5 font-medium">
-                {until === 0 ? '🎉 Today!' : until === 1 ? 'tomorrow' : 'days away'}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-3xl font-extrabold text-[#9B88C8]/30 leading-none">—</p>
-              <p className="text-[11px] text-[#2B3A4A]/30 mt-1.5 font-medium">set in profile</p>
-            </>
-          )}
+          <p className="text-sm font-bold text-[#9B88C8]">
+            {until === 0 ? 'Today 🎉' : `${until}d`}
+          </p>
         </div>
-      </div>
+      )}
     </div>
   )
 }

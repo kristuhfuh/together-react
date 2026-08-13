@@ -14,6 +14,7 @@ interface CoupleInfo {
   start_date: string | null
   next_visit: string | null
   dating_since: string | null
+  invite_code: string | null
 }
 
 export default function Home() {
@@ -23,7 +24,7 @@ export default function Home() {
   const slot = useSession(s => s.slot)
   const partnerSlot = slot === 'A' ? 'B' : 'A'
 
-  const [couple, setCouple] = useState<CoupleInfo>({ start_date: null, next_visit: null, dating_since: null })
+  const [couple, setCouple] = useState<CoupleInfo>({ start_date: null, next_visit: null, dating_since: null, invite_code: null })
   const [partnerAnswered, setPartnerAnswered] = useState(false)
   const [checkins, setCheckins] = useState<Record<string, boolean>>({})
   const question = todayQuestion(DAILY_QUESTIONS)
@@ -61,39 +62,60 @@ export default function Home() {
     if (table === 'daily_answers') loadAnswers()
   })
 
+  const partnerMissing = !partnerName
+
   return (
-    <main className="px-5 pt-12 pb-6 space-y-5 max-w-sm mx-auto">
+    <main className="px-5 pt-10 pb-24 max-w-sm mx-auto space-y-5">
+
+      {/* Greeting */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40">{greeting()}</p>
-        <h1 className="text-3xl font-extrabold text-[#2B3A4A] mt-0.5">{myName || '…'}</h1>
+        <p className="text-xs font-medium text-[#2B3A4A]/40">{greeting()}</p>
+        <h1 className="text-2xl font-extrabold text-[#2B3A4A] mt-0.5">{myName || '…'}</h1>
       </div>
 
-      <DaysRow startDate={couple.start_date} nextVisit={couple.next_visit} datingSince={couple.dating_since} />
+      {/* Invite banner — shown until partner joins */}
+      {partnerMissing && couple.invite_code && (
+        <Link href="/profile" className="flex items-center justify-between bg-[#EDE8F5] rounded-2xl px-4 py-3 active:scale-[0.99] transition-transform">
+          <div>
+            <p className="text-xs font-semibold text-[#9B88C8]">Waiting for your partner</p>
+            <p className="text-xs text-[#2B3A4A]/50 font-medium mt-0.5">Share code <span className="font-extrabold text-[#2B3A4A] tracking-widest">{couple.invite_code}</span></p>
+          </div>
+          <p className="text-[#9B88C8] font-bold text-sm">→</p>
+        </Link>
+      )}
 
-      <div className="bg-white rounded-3xl p-5 shadow-sm">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40 mb-4">This Week</p>
-        <WeeklyStrip checkins={checkins} />
-      </div>
-
+      {/* Today's Question — primary daily CTA */}
       <Link
         href="/question"
         className="block bg-[#EDE8F5] rounded-3xl p-5 active:scale-[0.98] transition-transform"
       >
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#9B88C8] mb-2">Today's Question</p>
-        <p className="text-base font-semibold text-[#2B3A4A] leading-snug line-clamp-2">{question}</p>
-        {partnerAnswered && (
-          <p className="text-xs text-[#9B88C8] font-semibold mt-2">
-            💜 {partnerName || 'Your partner'} has answered
-          </p>
-        )}
+        <div className="flex items-start justify-between mb-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9B88C8]/70">Today's Question</p>
+          {partnerAnswered && (
+            <span className="text-[10px] font-semibold text-[#9B88C8] bg-white/60 rounded-full px-2 py-0.5">💜 answered</span>
+          )}
+        </div>
+        <p className="text-[15px] font-semibold text-[#2B3A4A] leading-snug">{question}</p>
         <p className="text-xs font-bold text-[#9B88C8] mt-3">Answer →</p>
       </Link>
 
-      <div className="flex justify-center py-2">
+      {/* Thinking Button — emotional daily CTA */}
+      <div className="flex justify-center py-3">
         <ThinkingButton partnerName={partnerName || 'them'} />
       </div>
 
+      {/* Stats strip */}
+      <DaysRow startDate={couple.start_date} nextVisit={couple.next_visit} datingSince={couple.dating_since} />
+
+      {/* Weekly check-in strip */}
+      <div className="space-y-2.5">
+        <p className="text-xs font-semibold text-[#2B3A4A]/40">This week</p>
+        <WeeklyStrip checkins={checkins} />
+      </div>
+
+      {/* Deck carousel */}
       <DeckCarousel />
+
     </main>
   )
 }
