@@ -23,7 +23,7 @@ function DecksContent() {
     <main className="px-5 pt-12 pb-6 max-w-sm mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/home" className="text-[#9B88C8] text-sm font-bold">← Home</Link>
-        <h1 className="text-xl font-extrabold text-[#2B3A4A]">Prompt Decks</h1>
+        <h1 className="text-xl font-extrabold text-[#2B3A4A]">Fun Games</h1>
       </div>
 
       {/* Deck selector */}

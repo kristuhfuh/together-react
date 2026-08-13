@@ -7,7 +7,7 @@ export function DeckCarousel() {
 
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40 mb-3">Prompt Decks</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-[#2B3A4A]/40 mb-3">Fun Games</p>
       <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         {keys.map((key) => {
           const deck = DECKS[key]
