@@ -29,6 +29,10 @@ export async function POST(req: Request) {
   })
 
   if (memberErr) {
+    await supabaseAdmin.from('couples').delete().eq('id', couple.id)
+    if ((memberErr as { code?: string }).code === '23505') {
+      return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
+    }
     return NextResponse.json({ error: memberErr.message }, { status: 500 })
   }
 

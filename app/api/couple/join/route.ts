@@ -34,7 +34,12 @@ export async function POST(req: Request) {
     ...(email ? { email: email.trim().toLowerCase() } : {}),
   })
 
-  if (insertErr) return NextResponse.json({ error: 'DB error' }, { status: 500 })
+  if (insertErr) {
+    if ((insertErr as { code?: string }).code === '23505') {
+      return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
+    }
+    return NextResponse.json({ error: 'DB error' }, { status: 500 })
+  }
 
   const token = await signSession({
     coupleId: couple.id,

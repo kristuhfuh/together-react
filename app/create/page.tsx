@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function Create() {
   const router = useRouter()
@@ -27,7 +28,10 @@ export default function Create() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error ?? 'Something went wrong'); return }
+      if (!res.ok) {
+        setError(data.error === 'Email already registered' ? 'Email already registered' : (data.error ?? 'Something went wrong'))
+        return
+      }
       setCode(data.inviteCode)
       setDone(true)
     } catch {
@@ -116,7 +120,16 @@ export default function Create() {
           </div>
         </div>
 
-        {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+        {error && (
+          <div className="space-y-2">
+            <p className="text-red-500 text-sm font-medium">{error}</p>
+            {error === 'Email already registered' && (
+              <Link href="/signin" className="block text-sm font-semibold text-[#9B88C8]">
+                Sign in instead →
+              </Link>
+            )}
+          </div>
+        )}
 
         <button
           onClick={handleCreate}

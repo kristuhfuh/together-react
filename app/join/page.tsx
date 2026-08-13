@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function Join() {
   const router = useRouter()
@@ -29,6 +30,7 @@ export default function Join() {
         setError(
           data.error === 'Invalid code' ? 'Code not found — check it and try again'
           : data.error === 'Couple already full' ? 'This couple is already complete'
+          : data.error === 'Email already registered' ? 'Email already registered'
           : data.error ?? 'Something went wrong'
         )
         return
@@ -94,7 +96,16 @@ export default function Join() {
           </div>
         </div>
 
-        {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+        {error && (
+          <div className="space-y-2">
+            <p className="text-red-500 text-sm font-medium">{error}</p>
+            {error === 'Email already registered' && (
+              <Link href="/signin" className="block text-sm font-semibold text-[#9B88C8]">
+                Sign in instead →
+              </Link>
+            )}
+          </div>
+        )}
 
         <button
           onClick={handleJoin}
