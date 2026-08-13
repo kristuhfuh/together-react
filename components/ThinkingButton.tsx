@@ -22,7 +22,14 @@ export function ThinkingButton({ partnerName }: ThinkingButtonProps) {
       if (res.ok) {
         show(`${partnerName} knows you're thinking of them 💜`)
       } else {
-        show('Could not send — try again')
+        const data = await res.json().catch(() => ({}))
+        if (res.status === 404) {
+          show(`${partnerName} hasn't enabled notifications yet`)
+        } else if (res.status === 503) {
+          show('Push notifications not set up yet')
+        } else {
+          show(data.error ?? 'Could not send — try again')
+        }
       }
     } catch {
       show('Could not connect')
