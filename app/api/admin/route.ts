@@ -72,7 +72,7 @@ export async function DELETE(req: Request) {
   const { coupleId, slot } = await req.json()
   if (!coupleId) return NextResponse.json({ error: 'coupleId required' }, { status: 400 })
 
-  // Remove just one member slot
+  // Remove just one member slot, then auto-delete couple if no members remain
   if (slot) {
     const { error } = await supabaseAdmin
       .from('couple_members')
@@ -80,6 +80,23 @@ export async function DELETE(req: Request) {
       .eq('couple_id', coupleId)
       .eq('slot', slot)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    const { count } = await supabaseAdmin
+      .from('couple_members')
+      .select('slot', { count: 'exact', head: true })
+      .eq('couple_id', coupleId)
+
+    if ((count ?? 0) === 0) {
+      const { data: photos } = await supabaseAdmin
+        .from('photos')
+        .select('storage_path')
+        .eq('couple_id', coupleId)
+      if (photos?.length) {
+        await supabaseAdmin.storage.from('photos').remove(photos.map(p => p.storage_path))
+      }
+      await supabaseAdmin.from('couples').delete().eq('id', coupleId)
+    }
+
     return NextResponse.json({ ok: true })
   }
 
